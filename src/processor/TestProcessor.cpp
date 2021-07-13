@@ -1,78 +1,118 @@
 #include "Arduino.h"
 #include <processor/TestProcessor.h>
+#include <config/Config.h>
 
-void TestProcessor::onHome(char opcode) {
-    logHome(opcode);
+void TestProcessor::onHome(int i2cAddress, char opcode) {
+    logHome(i2cAddress, opcode);
+    PIXEL_WRITER.home(i2cAddress);
 }
 
-void TestProcessor::onSetLimitsAndHome(char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
-    logSetLimitsAndHome(opcode, limitP1, limitP2, limitP3, limitP4);
+void TestProcessor::onSetLimitsAndHome(int i2cAddress, char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
+    logSetLimitsAndHome(i2cAddress, opcode, limitP1, limitP2, limitP3, limitP4);
+    PIXEL_WRITER.setLimitsAndHome(i2cAddress, limitP1, limitP2, limitP3, limitP4);
 }
 
-void TestProcessor::onSetLimit(char opcode, char pixle, const PixelClientLimit& limit) {
-    logSetLimit(opcode, pixle, limit);
+void TestProcessor::onSetLimit(int i2cAddress, char opcode, char pixle, const PixelClientLimit& limit) {
+    logSetLimit(i2cAddress, opcode, pixle, limit);
+    PIXEL_WRITER.setLimit(i2cAddress, pixle, limit);
 }
 
-void TestProcessor::onSetSteps(char opcode, char pixle, int steps) {
-    logSetSteps(opcode, pixle, steps);
+void TestProcessor::onSetSteps(int i2cAddress, char opcode, char pixle, int steps) {
+    logSetSteps(i2cAddress, opcode, pixle, steps);
+    PIXEL_WRITER.setSteps(i2cAddress, pixle, steps);
 }
 
-void TestProcessor::onAddSteps(char opcode, char pixle, int steps) {
-    logAddSteps(opcode, pixle, steps);
+void TestProcessor::onAddSteps(int i2cAddress, char opcode, char pixle, int steps) {
+    logAddSteps(i2cAddress, opcode, pixle, steps);
+    PIXEL_WRITER.addSteps(i2cAddress, pixle, steps);
 }
 
-void TestProcessor::onSetAngle(char opcode, char pixle, double angle) {
-    logSetAngle(opcode, pixle, angle);
+void TestProcessor::onSetAngle(int i2cAddress, char opcode, char pixle, double angle) {
+    logSetAngle(i2cAddress, opcode, pixle, angle);
+    PIXEL_WRITER.setAngle(i2cAddress, pixle, angle);
 }
 
-void TestProcessor::onAddAngle(char opcode, char pixle, double angle) {
-    logAddAngle(opcode, pixle, angle);
+void TestProcessor::onAddAngle(int i2cAddress, char opcode, char pixle, double angle) {
+    logAddAngle(i2cAddress, opcode, pixle, angle);
+    PIXEL_WRITER.addAngle(i2cAddress, pixle, angle);
 }
 
-void TestProcessor::logHome(char opcode) {
-    Serial.println("CMD=HOME;");
+void TestProcessor::logHome(int i2cAddress, char opcode) {
+    Serial.print("HOME: ");
+    Serial.print(i2cAddress);
+    Serial.println();
 }
 
-void TestProcessor::logSetLimitsAndHome(char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
-    char buf[256];
-    const char format[] = "CMD=SET_LIMITS_AND_HOME; L1_LO=%i; L1_HI=%i; L2_LO=%i; L2_HI=%i; L3_LO=%i; L3_HI=%i; L4_LO=%i; L4_HI=%i;";
-    snprintf(buf, 256, format, limitP1.lower, limitP1.upper, limitP2.lower, limitP2.upper, limitP3.lower, limitP3.upper, limitP4.lower, limitP4.upper);
-    Serial.println(buf);
+void TestProcessor::logSetLimitsAndHome(int i2cAddress, char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
+    Serial.print("SET_LIMITS_AND_HOME: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print(limitP1.lower);
+    Serial.print(':');
+    Serial.print(limitP1.upper);
+    Serial.print(' ');
+    Serial.print(limitP2.lower);
+    Serial.print(':');
+    Serial.print(limitP2.upper);
+    Serial.print(' ');
+    Serial.print(limitP3.lower);
+    Serial.print(':');
+    Serial.print(limitP3.upper);
+    Serial.print(' ');
+    Serial.print(limitP4.lower);
+    Serial.print(':');
+    Serial.print(limitP4.upper);
+    Serial.println();
 }
 
-void TestProcessor::logSetLimit(char opcode, char pixle, const PixelClientLimit& limit) {
-    char buf[256];
-    const char format[] = "CMD=SET_LIMIT; PIXLE=%i; L_LO=%i; L_HI=%i;";
-    snprintf(buf, 256, format, pixle, limit.lower, limit.upper);
-    Serial.println(buf);
+void TestProcessor::logSetLimit(int i2cAddress, char opcode, char pixle, const PixelClientLimit& limit) {
+    Serial.print("SET_LIMIT: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixle);
+    Serial.print(' ');
+    Serial.print(limit.lower);
+    Serial.print(':');
+    Serial.print(limit.upper);
+    Serial.println();
 }
 
-void TestProcessor::logSetSteps(char opcode, char pixle, int steps) {
-    char buf[256];
-    const char format[] = "CMD=SET_STEPS; PIXLE=%i; STEPS=%i;";
-    snprintf(buf, 256, format, pixle, steps);
-    Serial.println(buf);
+void TestProcessor::logSetSteps(int i2cAddress, char opcode, char pixle, int steps) {
+    Serial.println("SET_STEPS: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixle);
+    Serial.print(' ');
+    Serial.print(steps);
+    Serial.println();
 }
 
-void TestProcessor::logAddSteps(char opcode, char pixle, int steps) {
-    char buf[256];
-    const char format[] = "CMD=ADD_STEPS; PIXLE=%i; STEPS=%i;";
-    snprintf(buf, 256, format, pixle, steps);
-    Serial.println(buf);
+void TestProcessor::logAddSteps(int i2cAddress, char opcode, char pixle, int steps) {
+    Serial.println("ADD_STEPS: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixle);
+    Serial.print(' ');
+    Serial.print(steps);
+    Serial.println();
 }
 
-void TestProcessor::logSetAngle(char opcode, char pixle, double angle) {
-    char buf[256];
-    const char format[] = "CMD=SET_ANGLE; PIXLE=%i; ANGLE=";
-    snprintf(buf, 256, format, pixle);
-    Serial.println(buf);
-    Serial.println(angle);
+void TestProcessor::logSetAngle(int i2cAddress, char opcode, char pixle, double angle) {
+    Serial.println("SET_ANGLE: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixle);
+    Serial.print(' ');
+    Serial.print(angle);
+    Serial.println();
 }
 
-void TestProcessor::logAddAngle(char opcode, char pixle, double angle) {
-    char buf[256];
-    const char format[] = "CMD=ADD_ANGLE; PIXLE=%i; ANGLE=";
-    snprintf(buf, 256, format, pixle);
-    Serial.print(buf);
-    Serial.println(angle);
+void TestProcessor::logAddAngle(int i2cAddress, char opcode, char pixle, double angle) {
+    Serial.println("ADD_ANGLE: ");
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixle);
+    Serial.print(' ');
+    Serial.print(angle);
+    Serial.println();
 }

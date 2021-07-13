@@ -1,7 +1,7 @@
 #ifndef PIXEL_TESTER_ARGUMENTS
 #define PIXEL_TESTER_ARGUMENTS
 
-#define ARGUMENTS_BUFFER_SIZE 256
+#define ARGUMENTS_BUFFER_SIZE 80
 #define ARGUMENTS_MAX_COUNT 6
 
 #include "Arduino.h"
@@ -57,7 +57,7 @@ public:
     bool getLimits(size_t index, int& lower, int& upper);
 
 private:
-    /** the input buffer */
+    /** the argument buffer */
     char buffer[ARGUMENTS_BUFFER_SIZE];
 
     /** an array of pointers, pointing to the start of each arg */

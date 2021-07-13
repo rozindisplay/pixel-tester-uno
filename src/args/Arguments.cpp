@@ -2,16 +2,18 @@
 
 #define ARGUMENTS_LINE_DELIMITER '\n'
 #define ARGUMENTS_LIMIT_MAX 16
+#define ARGUMENTS_NULL_CHAR '\0'
+#define ARGUMENTS_ERROR_INDEX_OUT_OF_BOUNDS "ERR: idx out of bounds"
 
 bool Arguments::next() {
     if(Serial.available()==0) {
-        Serial.println("ERROR: user input not found");
+        Serial.println("ERR: no input");
         return false;
     }
 
     // clean buffer
     for(int i=0; i<ARGUMENTS_BUFFER_SIZE; i++) {
-        buffer[i] = '\0';
+        buffer[i] = ARGUMENTS_NULL_CHAR;
     }
 
     // read line into buffer
@@ -22,30 +24,43 @@ bool Arguments::next() {
     bool argFound = false;
     for(int i=0; i<ARGUMENTS_BUFFER_SIZE; i++) {
         char ch = buffer[i];
-        if('\0' == ch) {
-            // found the end of the string
+        if(ARGUMENTS_NULL_CHAR == ch) {
+            // Found the end of the string.
             count = argCount;
             return true;
         }
 
         if(isWhitespace(ch)) {
-            buffer[i] = '\0';
+            // Whitespace delimits our arguments.
+            // We convert whitespace to the null terminating chars of the args
+            buffer[i] = ARGUMENTS_NULL_CHAR;
+
+            // We are no longer looking at an argument.
             argFound = false;
         } else if(!argFound) {
-            if(argCount+1 == ARGUMENTS_MAX_COUNT) {
-                Serial.println("ERROR: too many arguments given");
+            // start of next argument found
+            if(argCount == ARGUMENTS_MAX_COUNT) {
+                // we have a predetermined number of pointers
+                Serial.println("ERR: too many args");
                 return false;
             }
 
+            // all chars will be converted to lowercase
+            buffer[i] = lowercase(ch);
+
+            // We found the arg. Keep the arg's location from the buffer
             args[argCount++] = &buffer[i];
+            
+            // We are looking at an argument.
             argFound = true;
         } else {
+            // we're in the middle of reading in an arg
             // all chars will be converted to lowercase
             buffer[i] = lowercase(ch);
         }
     }
 
-    Serial.println("ERROR: reached end of buffer and did not find null terminator");
+    Serial.println("ERR: EOF found");
     return false;
 }
 
@@ -55,7 +70,7 @@ size_t Arguments::getCount() {
 
 bool Arguments::getString(size_t index, char*& value) {
     if(index>=count) {
-        Serial.println("index out of bounds");
+        Serial.println(ARGUMENTS_ERROR_INDEX_OUT_OF_BOUNDS);
         return false;
     }
 
@@ -65,7 +80,7 @@ bool Arguments::getString(size_t index, char*& value) {
 
 bool Arguments::getInt(size_t index, int& value) {
     if(index>=count) {
-        Serial.println("index out of bounds");
+        Serial.println(ARGUMENTS_ERROR_INDEX_OUT_OF_BOUNDS);
         return false;
     }
 
@@ -75,42 +90,32 @@ bool Arguments::getInt(size_t index, int& value) {
 
 bool Arguments::getDouble(size_t index, double& value) {
     if(index>=count) {
-        Serial.println("index out of bounds");
+        Serial.println(ARGUMENTS_ERROR_INDEX_OUT_OF_BOUNDS);
         return false;
     }
-
-    char* num = args[index];
-    char* end;
 
     // parse the value
-    double fvalue = strtod(num, &end);
-    if (end == num) {
-        // failed to parse
-        Serial.println("failed to parse number");
-        return false;
-    }
-    
-    value = fvalue;
+    value = atof(args[index]);
     return true;
 }
 
 bool Arguments::getLimits(size_t index, int& lower, int& upper) {
     if(index>=count) {
-        Serial.println("index out of bounds");
+        Serial.println(ARGUMENTS_ERROR_INDEX_OUT_OF_BOUNDS);
         return false;
     }
 
     char* limits = args[index];
     size_t size = strlen(limits);
     if(ARGUMENTS_LIMIT_MAX <= size) {
-        Serial.println("size of defined limit is too long");
+        Serial.println("ERR: limit too long");
         return false;
     }
 
     size_t sizeWithNull = size+1;
     char buffer[sizeWithNull];
     for(size_t i=0; i<sizeWithNull; i++) {
-        buffer[i] = '\0';
+        buffer[i] = ARGUMENTS_NULL_CHAR;
     }
     memcpy(buffer, limits, size);
 
@@ -120,7 +125,7 @@ bool Arguments::getLimits(size_t index, int& lower, int& upper) {
     for(size_t i=0; i<size; i++) {
         char ch = buffer[i];
         if(':' == ch) {
-            buffer[i] = '\0';
+            buffer[i] = ARGUMENTS_NULL_CHAR;
             upperStr = &buffer[i] + 1;
             break;
         }
@@ -153,22 +158,6 @@ char Arguments::lowercase(char ch) {
 }
 
 bool Arguments::parseInt(char* num, int& value) {
-    char* end;
-
-    // parse the value
-    long lvalue = strtol(num, &end, 10);
-    
-    if (end == num) {
-        // failed to parse
-        Serial.println("failed to parse number");
-        return false;
-    }
-    if (lvalue > INT16_MAX || lvalue < INT16_MIN) {
-        // out of range
-        Serial.println("parsed number out of range");
-        return false;
-    }
-
-    value = (int)lvalue;
+    value = atoi(num);
     return true;
 }

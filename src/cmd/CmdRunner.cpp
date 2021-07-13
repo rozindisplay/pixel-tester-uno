@@ -4,7 +4,7 @@
 #include <config/Config.h>
 #include <PixelClientConsts.h>
 
-CmdRunner::CmdRunner(PixelClientProcessor& processor): processor(&processor) {
+CmdRunner::CmdRunner(TestProcessor& processor): processor(&processor) {
 }
 
 void CmdRunner::run() {
@@ -36,130 +36,165 @@ void CmdRunner::run() {
     } else if (strcmp("help", token)==0) {
         cmdHelp();
     } else {
-        Serial.print("ERROR: Unknown Command : ");
+        Serial.print("ERR CMD: ");
         Serial.println(token);
         cmdHelp();
     }
 }
 
 void CmdRunner::printHelp() {
-    Serial.println("pixel-tester-uno");
+    Serial.println("Pixel-Tester");
     Serial.println();
     Serial.println("Commands:");
-    Serial.println(" home                                         - runs the home process");
-    Serial.println(" home <lo>:<hi> <lo>:<hi> <lo>:<hi> <lo>:<hi> - sets the limits for all pixles and runs the home process");
-    Serial.println(" limit <pixle> <lo>:<hi>                      - sets the limits for the given pixle");
-    Serial.println(" set-steps <pixle> <steps>                    - sets the position to the given steps");
-    Serial.println(" add-steps <pixle> <steps>                    - adds the given steps to the current position");
-    Serial.println(" set-angle <pixle> <angle>                    - sets the position to the given angle");
-    Serial.println(" add-angle <pixle> <angle>                    - adds the given angle to the current position");
-    Serial.println(" help                                         - print this menu");
+    Serial.println(" home <adrs>                                 - runs the home process");
+    Serial.println(" home <adrs> <l>:<h> <l>:<h> <l>:<h> <l>:<h> - sets the limits for all pixles and runs the home process");
+    Serial.println(" limit <adrs> <pixle> <lo>:<hi>              - sets the limits for the given pixle");
+    Serial.println(" set-steps <adrs> <pixle> <steps>            - sets the position to the given steps");
+    Serial.println(" add-steps <adrs> <pixle> <steps>            - adds the given steps to the current position");
+    Serial.println(" set-angle <adrs> <pixle> <angle>            - sets the position to the given angle");
+    Serial.println(" add-angle <adrs> <pixle> <angle>            - adds the given angle to the current position");
+    Serial.println(" help                                        - print this menu");
 }
 
 void CmdRunner::cmdHome() {
-    if(ARGUMENTS.getCount()==1) {
-        processor->onHome(OP_HOME);
+    if(ARGUMENTS.getCount()==2) {
+        int adrs;
+        if(!ARGUMENTS.getInt(1, adrs)) {
+            return;
+        }
+
+        processor->onHome(adrs, OP_HOME);
         return;
-    } else if(ARGUMENTS.getCount()==5) {
+    } else if(ARGUMENTS.getCount()==6) {
+        int adrs;
+        if(!ARGUMENTS.getInt(1, adrs)) {
+            return;
+        }
+        
         int lo = 0;
         int hi = 0;
-
-        if(!ARGUMENTS.getLimits(1, lo, hi)) {
+        if(!ARGUMENTS.getLimits(2, lo, hi)) {
             return;
         }
         PixelClientLimit l1(lo, hi);
 
-        if(!ARGUMENTS.getLimits(2, lo, hi)) {
+        if(!ARGUMENTS.getLimits(3, lo, hi)) {
             return;
         }
         PixelClientLimit l2(lo, hi);
 
-        if(!ARGUMENTS.getLimits(3, lo, hi)) {
+        if(!ARGUMENTS.getLimits(4, lo, hi)) {
             return;
         }
         PixelClientLimit l3(lo, hi);
 
-        if(!ARGUMENTS.getLimits(4, lo, hi)) {
+        if(!ARGUMENTS.getLimits(5, lo, hi)) {
             return;
         }
         PixelClientLimit l4(lo, hi);
 
-        processor->onSetLimitsAndHome(OP_SET_LIMITS_AND_HOME, l1, l2, l3, l4);
+        processor->onSetLimitsAndHome(adrs, OP_SET_LIMITS_AND_HOME, l1, l2, l3, l4);
     } else {
         // TODO error
     }
 }
 
 void CmdRunner::cmdLimit() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+    
     int pixle;
-    if(!ARGUMENTS.getInt(1, pixle)) {
+    if(!ARGUMENTS.getInt(2, pixle)) {
         return;
     }
 
     int lo;
     int hi;
-    if(!ARGUMENTS.getLimits(2, lo, hi)) {
+    if(!ARGUMENTS.getLimits(3, lo, hi)) {
         return;
     }
 
     PixelClientLimit limit(lo, hi);
-    processor->onSetLimit(OP_SET_LIMITS, pixle, limit);
+    processor->onSetLimit(adrs, OP_SET_LIMITS, pixle, limit);
 }
 
 void CmdRunner::cmdSetSteps() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+    
     int pixle;
-    if(!ARGUMENTS.getInt(1, pixle)) {
+    if(!ARGUMENTS.getInt(2, pixle)) {
         return;
     }
 
     int steps;
-    if(!ARGUMENTS.getInt(2, steps)) {
+    if(!ARGUMENTS.getInt(3, steps)) {
         return;
     }
 
-    processor->onSetSteps(OP_SET_STEPS, pixle, steps);
+    processor->onSetSteps(adrs, OP_SET_STEPS, pixle, steps);
 }
 
 void CmdRunner::cmdAddSteps() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+
+
     int pixle;
-    if(!ARGUMENTS.getInt(1, pixle)) {
+    if(!ARGUMENTS.getInt(2, pixle)) {
         return;
     }
 
     int steps;
-    if(!ARGUMENTS.getInt(2, steps)) {
+    if(!ARGUMENTS.getInt(3, steps)) {
         return;
     }
 
-    processor->onAddSteps(OP_ADD_STEPS, pixle, steps);
+    processor->onAddSteps(adrs, OP_ADD_STEPS, pixle, steps);
 }
 
 void CmdRunner::cmdSetAngle() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+    
     int pixle;
-    if(!ARGUMENTS.getInt(1, pixle)) {
+    if(!ARGUMENTS.getInt(2, pixle)) {
         return;
     }
 
     double angle;
-    if(!ARGUMENTS.getDouble(2, angle)) {
+    if(!ARGUMENTS.getDouble(3, angle)) {
         return;
     }
 
-    processor->onSetAngle(OP_SET_ANGLE, pixle, angle);
+    processor->onSetAngle(adrs, OP_SET_ANGLE, pixle, angle);
 }
 
 void CmdRunner::cmdAddAngle() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+
     int pixle;
-    if(!ARGUMENTS.getInt(1, pixle)) {
+    if(!ARGUMENTS.getInt(2, pixle)) {
         return;
     }
 
     double angle;
-    if(!ARGUMENTS.getDouble(2, angle)) {
+    if(!ARGUMENTS.getDouble(3, angle)) {
         return;
     }
 
-    processor->onAddAngle(OP_ADD_ANGLE, pixle, angle);
+    processor->onAddAngle(adrs, OP_ADD_ANGLE, pixle, angle);
 }
 
 

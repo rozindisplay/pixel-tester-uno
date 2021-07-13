@@ -1,6 +1,8 @@
 #ifndef PIXEL_TESTER_CONFIG
 #define PIXEL_TESTER_CONFIG
 
+#include "PixelClientWriter.h"
+
 #include <cmd/CmdRunner.h>
 #include <args/Arguments.h>
 #include <processor/TestProcessor.h>
@@ -13,9 +15,7 @@
 #define OPCODE_SET_ANGLE "SET_ANDLE"
 #define OPCODE_ADD_ANGLE "ADD_ANDLE"
 
-
-//extern PixelClientReader PIXEL_READER;
-//extern PixelClientWriter PIXEL_WRITER;
+extern PixelClientWriter PIXEL_WRITER;
 
 extern TestProcessor PROCESSOR;
 extern Arguments ARGUMENTS;

@@ -1,15 +1,15 @@
 #ifndef PIXEL_TESTER_CMD_RUNNER
 #define PIXEL_TESTER_CMD_RUNNER
 
-#include "PixelClientProcessor.h"
+#include <processor/TestProcessor.h>
 
 class CmdRunner {
 public:
-    CmdRunner(PixelClientProcessor& processor);
+    CmdRunner(TestProcessor& processor);
     void run();
     void printHelp();
 private:
-    PixelClientProcessor* processor;
+    TestProcessor* processor;
     void cmdHome();
     void cmdLimit();
     void cmdSetSteps();

@@ -3,23 +3,23 @@
 
 #include "PixelClientProcessor.h"
 
-class TestProcessor: public PixelClientProcessor  {
+class TestProcessor {
 public:
-    void onHome(char opcode);
-    void onSetLimitsAndHome(char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4);
-    void onSetLimit(char opcode, char pixle, const PixelClientLimit& limit);
-    void onSetSteps(char opcode, char pixle, int steps);
-    void onAddSteps(char opcode, char pixle, int steps);
-    void onSetAngle(char opcode, char pixle, double angle);
-    void onAddAngle(char opcode, char pixle, double angle);
+    void onHome(int i2cAddress, char opcode);
+    void onSetLimitsAndHome(int i2cAddress, char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4);
+    void onSetLimit(int i2cAddress, char opcode, char pixle, const PixelClientLimit& limit);
+    void onSetSteps(int i2cAddress, char opcode, char pixle, int steps);
+    void onAddSteps(int i2cAddress, char opcode, char pixle, int steps);
+    void onSetAngle(int i2cAddress, char opcode, char pixle, double angle);
+    void onAddAngle(int i2cAddress, char opcode, char pixle, double angle);
 private:
-    void logHome(char opcode);
-    void logSetLimitsAndHome(char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4);
-    void logSetLimit(char opcode, char pixle, const PixelClientLimit& limit);
-    void logSetSteps(char opcode, char pixle, int steps);
-    void logAddSteps(char opcode, char pixle, int steps);
-    void logSetAngle(char opcode, char pixle, double angle);
-    void logAddAngle(char opcode, char pixle, double angle);
+    void logHome(int i2cAddress, char opcode);
+    void logSetLimitsAndHome(int i2cAddress, char opcode, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4);
+    void logSetLimit(int i2cAddress, char opcode, char pixle, const PixelClientLimit& limit);
+    void logSetSteps(int i2cAddress, char opcode, char pixle, int steps);
+    void logAddSteps(int i2cAddress, char opcode, char pixle, int steps);
+    void logSetAngle(int i2cAddress, char opcode, char pixle, double angle);
+    void logAddAngle(int i2cAddress, char opcode, char pixle, double angle);
 };
 
 #endif
