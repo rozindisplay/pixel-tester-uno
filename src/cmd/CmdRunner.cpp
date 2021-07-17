@@ -33,6 +33,10 @@ void CmdRunner::run() {
         cmdSetAngle();
     } else if (strcmp("add-angle", token)==0) {
         cmdAddAngle();
+    } else if (strcmp("ping", token)==0) {
+        cmdPing();
+    } else if (strcmp("error", token)==0) {
+        cmdError();
     } else if (strcmp("help", token)==0) {
         cmdHelp();
     } else {
@@ -53,6 +57,8 @@ void CmdRunner::printHelp() {
     Serial.println(" add-steps <adrs> <pixle> <steps>            - adds the given steps to the current position");
     Serial.println(" set-angle <adrs> <pixle> <angle>            - sets the position to the given angle");
     Serial.println(" add-angle <adrs> <pixle> <angle>            - adds the given angle to the current position");
+    Serial.println(" ping <adrs>                                 - makes a ping request");
+    Serial.println(" error <adrs>                                - makes a request for an error code");
     Serial.println(" help                                        - print this menu");
 }
 
@@ -63,7 +69,7 @@ void CmdRunner::cmdHome() {
             return;
         }
 
-        processor->onHome(adrs, OP_HOME);
+        processor->onHome(adrs);
         return;
     } else if(ARGUMENTS.getCount()==6) {
         int adrs;
@@ -93,7 +99,7 @@ void CmdRunner::cmdHome() {
         }
         PixelClientLimit l4(lo, hi);
 
-        processor->onSetLimitsAndHome(adrs, OP_SET_LIMITS_AND_HOME, l1, l2, l3, l4);
+        processor->onSetLimitsAndHome(adrs, l1, l2, l3, l4);
     } else {
         // TODO error
     }
@@ -117,7 +123,7 @@ void CmdRunner::cmdLimit() {
     }
 
     PixelClientLimit limit(lo, hi);
-    processor->onSetLimit(adrs, OP_SET_LIMITS, pixle, limit);
+    processor->onSetLimit(adrs, pixle, limit);
 }
 
 void CmdRunner::cmdSetSteps() {
@@ -136,7 +142,7 @@ void CmdRunner::cmdSetSteps() {
         return;
     }
 
-    processor->onSetSteps(adrs, OP_SET_STEPS, pixle, steps);
+    processor->onSetSteps(adrs, pixle, steps);
 }
 
 void CmdRunner::cmdAddSteps() {
@@ -156,7 +162,7 @@ void CmdRunner::cmdAddSteps() {
         return;
     }
 
-    processor->onAddSteps(adrs, OP_ADD_STEPS, pixle, steps);
+    processor->onAddSteps(adrs, pixle, steps);
 }
 
 void CmdRunner::cmdSetAngle() {
@@ -175,7 +181,7 @@ void CmdRunner::cmdSetAngle() {
         return;
     }
 
-    processor->onSetAngle(adrs, OP_SET_ANGLE, pixle, angle);
+    processor->onSetAngle(adrs, pixle, angle);
 }
 
 void CmdRunner::cmdAddAngle() {
@@ -194,7 +200,25 @@ void CmdRunner::cmdAddAngle() {
         return;
     }
 
-    processor->onAddAngle(adrs, OP_ADD_ANGLE, pixle, angle);
+    processor->onAddAngle(adrs, pixle, angle);
+}
+
+void CmdRunner::cmdPing() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+
+    processor->onPing(adrs);
+}
+
+void CmdRunner::cmdError() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return;
+    }
+
+    processor->onError(adrs);
 }
 
 

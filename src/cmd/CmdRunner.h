@@ -16,6 +16,8 @@ private:
     void cmdAddSteps();
     void cmdSetAngle();
     void cmdAddAngle();
+    void cmdPing();
+    void cmdError();
     void cmdHelp();
 };
 
