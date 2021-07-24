@@ -23,36 +23,43 @@ void CmdRunner::run() {
         return;
     }
 
+    int err;
+
     if(strcmp("init", token)==0) {
-        cmdInit();
+        err = cmdInit();
     } else if(strcmp("home", token)==0) {
-        cmdHome();
+        err = cmdHome();
     } else if (strcmp("clear-error", token)==0) {
-        cmdClearError();
+        err = cmdClearError();
     } else if (strcmp("limit", token)==0) {
-        cmdLimit();
+        err = cmdLimit();
     } else if (strcmp("set-steps", token)==0) {
-        cmdSetSteps();
+        err = cmdSetSteps();
     } else if (strcmp("add-steps", token)==0) {
-        cmdAddSteps();
+        err = cmdAddSteps();
     } else if (strcmp("set-angle", token)==0) {
-        cmdSetAngle();
+        err = cmdSetAngle();
     } else if (strcmp("add-angle", token)==0) {
-        cmdAddAngle();
+        err = cmdAddAngle();
     } else if (strcmp("ping", token)==0) {
-        cmdPing();
+        err = cmdPing();
     } else if (strcmp("error", token)==0) {
-        cmdError();
+        err = cmdError();
     } else if (strcmp("moving", token)==0) {
-        cmdMoving();
+        err = cmdMoving();
     } else if (strcmp("status", token)==0) {
-        cmdStatus();
+        err = cmdStatus();
     } else if (strcmp("help", token)==0) {
-        cmdHelp();
+        err = cmdHelp();
     } else {
         Serial.print("ERR CMD: ");
         Serial.println(token);
         cmdHelp();
+    }
+
+    if(err!=0) {
+        Serial.print("Err: ");
+        Serial.println(err);
     }
 }
 
@@ -145,22 +152,22 @@ int CmdRunner::cmdInit() {
     if(!ARGUMENTS.getLimits(2, lo, hi)) {
         return ERROR_INVALID_INPUT;
     }
-    Limit l1(lo, hi);
+    PixLimit l1(lo, hi);
 
     if(!ARGUMENTS.getLimits(3, lo, hi)) {
         return ERROR_INVALID_INPUT;
     }
-    Limit l2(lo, hi);
+    PixLimit l2(lo, hi);
 
     if(!ARGUMENTS.getLimits(4, lo, hi)) {
         return ERROR_INVALID_INPUT;
     }
-    Limit l3(lo, hi);
+    PixLimit l3(lo, hi);
 
     if(!ARGUMENTS.getLimits(5, lo, hi)) {
         return ERROR_INVALID_INPUT;
     }
-    Limit l4(lo, hi);
+    PixLimit l4(lo, hi);
 
     return processor->onInit(adrs, l1, l2, l3, l4);
 }
@@ -201,7 +208,7 @@ int CmdRunner::cmdLimit() {
         return ERROR_INVALID_INPUT;
     }
 
-    Limit limit(lo, hi);
+    PixLimit limit(lo, hi);
     return processor->onSetLimit(adrs, pixel, limit);
 }
 
@@ -315,7 +322,12 @@ int CmdRunner::cmdStatus() {
         return ERROR_INVALID_INPUT;
     }
 
-    return processor->onStatus(adrs);
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onStatus(adrs, pixel);
 }
 
 int CmdRunner::cmdHelp() {
