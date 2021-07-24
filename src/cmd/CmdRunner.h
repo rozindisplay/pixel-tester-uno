@@ -10,15 +10,21 @@ public:
     void printHelp();
 private:
     TestProcessor* processor;
-    void cmdHome();
-    void cmdLimit();
-    void cmdSetSteps();
-    void cmdAddSteps();
-    void cmdSetAngle();
-    void cmdAddAngle();
-    void cmdPing();
-    void cmdError();
-    void cmdHelp();
+    int cmdInit();
+    int cmdHome();
+    int cmdClearError();
+    int cmdLimit();
+    int cmdSetSteps();
+    int cmdAddSteps();
+    int cmdSetAngle();
+    int cmdAddAngle();
+    int cmdPing();
+    int cmdError();
+    int cmdMoving();
+    int cmdStatus();
+    int cmdHelp();
+
+    void printCmd(const char* cmd, const char* args[], int size, int spaces, const char* description);
 };
 
 #endif

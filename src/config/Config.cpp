@@ -1,6 +1,6 @@
 #include "Config.h"
 
-PixelClientWriter PIXEL_WRITER = PixelClientWriter();
+PixWriter PIXEL_WRITER = PixWriter();
 
 Arguments ARGUMENTS = Arguments();
 TestProcessor PROCESSOR = TestProcessor();

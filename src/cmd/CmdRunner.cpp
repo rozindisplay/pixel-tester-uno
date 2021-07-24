@@ -2,7 +2,9 @@
 #include <cmd/CmdRunner.h>
 
 #include <config/Config.h>
-#include <PixelClientConsts.h>
+#include <pix/PixConsts.h>
+
+#define ERROR_INVALID_INPUT 1101
 
 CmdRunner::CmdRunner(TestProcessor& processor): processor(&processor) {
 }
@@ -21,8 +23,12 @@ void CmdRunner::run() {
         return;
     }
 
-    if(strcmp("home", token)==0) {
+    if(strcmp("init", token)==0) {
+        cmdInit();
+    } else if(strcmp("home", token)==0) {
         cmdHome();
+    } else if (strcmp("clear-error", token)==0) {
+        cmdClearError();
     } else if (strcmp("limit", token)==0) {
         cmdLimit();
     } else if (strcmp("set-steps", token)==0) {
@@ -37,6 +43,10 @@ void CmdRunner::run() {
         cmdPing();
     } else if (strcmp("error", token)==0) {
         cmdError();
+    } else if (strcmp("moving", token)==0) {
+        cmdMoving();
+    } else if (strcmp("status", token)==0) {
+        cmdStatus();
     } else if (strcmp("help", token)==0) {
         cmdHelp();
     } else {
@@ -50,178 +60,265 @@ void CmdRunner::printHelp() {
     Serial.println("Pixel-Tester");
     Serial.println();
     Serial.println("Commands:");
-    Serial.println(" home <adrs>                                 - runs the home process");
-    Serial.println(" home <adrs> <l>:<h> <l>:<h> <l>:<h> <l>:<h> - sets the limits for all pixles and runs the home process");
-    Serial.println(" limit <adrs> <pixle> <lo>:<hi>              - sets the limits for the given pixle");
-    Serial.println(" set-steps <adrs> <pixle> <steps>            - sets the position to the given steps");
-    Serial.println(" add-steps <adrs> <pixle> <steps>            - adds the given steps to the current position");
-    Serial.println(" set-angle <adrs> <pixle> <angle>            - sets the position to the given angle");
-    Serial.println(" add-angle <adrs> <pixle> <angle>            - adds the given angle to the current position");
-    Serial.println(" ping <adrs>                                 - makes a ping request");
-    Serial.println(" error <adrs>                                - makes a request for an error code");
-    Serial.println(" help                                        - print this menu");
+    
+    // init <adrs> <l>:<h> <l>:<h> <l>:<h> <l>:<h> - sets the limits for all pixels and runs the home process
+    // home <adrs>                                 - runs the home process
+    // clear-error <adrs>                          - clears and resets the error code
+    // limit <adrs> <pixel> <l>:<h>                - sets the limits for the given pixel
+    // set-steps <adrs> <pixel> <steps>            - sets the position to the given steps
+    // set-angle <adrs> <pixel> <angle>            - sets the position to the given angle
+    // ping <adrs>                                 - makes a ping request
+    // error <adrs>                                - makes a request for an error code
+    // moving <adrs>                               - makes a request for the number of pixels currently moving
+    // status <adrs>                               - makes a request for the current status
+    // help                                        - print this menu
+
+    // init
+    const char* initArgs[] = {"<adrs>", "<l>:<h>", "<l>:<h>", "<l>:<h>", "<l>:<h>"};
+    printCmd("init", initArgs, 5, 1, "sets the limits for all pixels and runs the home process");
+
+    // home
+    const char* adrsArgs[] = {"<adrs>"};
+    printCmd("home", adrsArgs, 1, 33, "runs the home process");
+
+    // clear errors
+    printCmd("clear-error", adrsArgs, 1, 26, "clears and resets the error code");
+
+    // limit
+    const char* limitArgs[] = {"<adrs>", "<pixel>", "<l>:<h>"};
+    printCmd("limit", limitArgs, 3, 16, "clears and resets the error code");
+
+    // set-steps
+    const char* stepsArgs[] = {"<adrs>", "<pixel>", "<steps>"};
+    printCmd("set-steps", stepsArgs, 3, 12, "sets the position to the given steps");
+
+    // add-steps
+    printCmd("add-steps", stepsArgs, 3, 12, "adds the given steps to the current position");
+
+    // set-angle
+    const char* angleArgs[] = {"<adrs>", "<pixel>", "<angle>"};
+    printCmd("set-angle", angleArgs, 3, 12, "sets the position to the given angle");
+
+    // add-angle
+    printCmd("add-angle", angleArgs, 3, 12, "adds the given angle to the current position");
+
+    // ping
+    printCmd("ping", adrsArgs, 1, 33, "makes a ping request");
+
+    // error
+    printCmd("error", adrsArgs, 1, 32, "makes a request for an error code");
+
+    // moving
+    printCmd("moving", adrsArgs, 1, 31, "makes a request for the number of pixels currently moving");
+
+    // status
+    printCmd("status", adrsArgs, 1, 31, "makes a request for the current status");
+
+    // help
+    printCmd("help", adrsArgs, 0, 40, "print this menu");
 }
 
-void CmdRunner::cmdHome() {
-    if(ARGUMENTS.getCount()==2) {
-        int adrs;
-        if(!ARGUMENTS.getInt(1, adrs)) {
-            return;
-        }
-
-        processor->onHome(adrs);
-        return;
-    } else if(ARGUMENTS.getCount()==6) {
-        int adrs;
-        if(!ARGUMENTS.getInt(1, adrs)) {
-            return;
-        }
-        
-        int lo = 0;
-        int hi = 0;
-        if(!ARGUMENTS.getLimits(2, lo, hi)) {
-            return;
-        }
-        PixelClientLimit l1(lo, hi);
-
-        if(!ARGUMENTS.getLimits(3, lo, hi)) {
-            return;
-        }
-        PixelClientLimit l2(lo, hi);
-
-        if(!ARGUMENTS.getLimits(4, lo, hi)) {
-            return;
-        }
-        PixelClientLimit l3(lo, hi);
-
-        if(!ARGUMENTS.getLimits(5, lo, hi)) {
-            return;
-        }
-        PixelClientLimit l4(lo, hi);
-
-        processor->onSetLimitsAndHome(adrs, l1, l2, l3, l4);
-    } else {
-        // TODO error
+void CmdRunner::printCmd(const char* cmd, const char* args[], int argsize, int spaces, const char* description) {
+    Serial.print(" ");
+    Serial.print(cmd);
+    for(int i=0; i<argsize; i++) {
+        Serial.print(" ");
+        Serial.print(args[i]);
     }
+
+    for(int i=0; i<spaces; i++) {
+        Serial.print(" ");
+    }
+    Serial.print("-");
+    Serial.print(" ");
+    Serial.println(description);
 }
 
-void CmdRunner::cmdLimit() {
+int CmdRunner::cmdInit() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
     
-    int pixle;
-    if(!ARGUMENTS.getInt(2, pixle)) {
-        return;
+    int lo = 0;
+    int hi = 0;
+    if(!ARGUMENTS.getLimits(2, lo, hi)) {
+        return ERROR_INVALID_INPUT;
+    }
+    Limit l1(lo, hi);
+
+    if(!ARGUMENTS.getLimits(3, lo, hi)) {
+        return ERROR_INVALID_INPUT;
+    }
+    Limit l2(lo, hi);
+
+    if(!ARGUMENTS.getLimits(4, lo, hi)) {
+        return ERROR_INVALID_INPUT;
+    }
+    Limit l3(lo, hi);
+
+    if(!ARGUMENTS.getLimits(5, lo, hi)) {
+        return ERROR_INVALID_INPUT;
+    }
+    Limit l4(lo, hi);
+
+    return processor->onInit(adrs, l1, l2, l3, l4);
+}
+
+int CmdRunner::cmdHome() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        // todo
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onHome(adrs);
+}
+
+int CmdRunner::cmdClearError() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onClearError(adrs);
+}
+
+int CmdRunner::cmdLimit() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
     }
 
     int lo;
     int hi;
     if(!ARGUMENTS.getLimits(3, lo, hi)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    PixelClientLimit limit(lo, hi);
-    processor->onSetLimit(adrs, pixle, limit);
+    Limit limit(lo, hi);
+    return processor->onSetLimit(adrs, pixel, limit);
 }
 
-void CmdRunner::cmdSetSteps() {
+int CmdRunner::cmdSetSteps() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
     
-    int pixle;
-    if(!ARGUMENTS.getInt(2, pixle)) {
-        return;
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
     }
 
     int steps;
     if(!ARGUMENTS.getInt(3, steps)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onSetSteps(adrs, pixle, steps);
+    return processor->onSetSteps(adrs, pixel, steps);
 }
 
-void CmdRunner::cmdAddSteps() {
+int CmdRunner::cmdAddSteps() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
 
-    int pixle;
-    if(!ARGUMENTS.getInt(2, pixle)) {
-        return;
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
     }
 
     int steps;
     if(!ARGUMENTS.getInt(3, steps)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onAddSteps(adrs, pixle, steps);
+    return processor->onAddSteps(adrs, pixel, steps);
 }
 
-void CmdRunner::cmdSetAngle() {
+int CmdRunner::cmdSetAngle() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
     
-    int pixle;
-    if(!ARGUMENTS.getInt(2, pixle)) {
-        return;
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
     }
 
     double angle;
     if(!ARGUMENTS.getDouble(3, angle)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onSetAngle(adrs, pixle, angle);
+    return processor->onSetAngle(adrs, pixel, angle);
 }
 
-void CmdRunner::cmdAddAngle() {
+int CmdRunner::cmdAddAngle() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    int pixle;
-    if(!ARGUMENTS.getInt(2, pixle)) {
-        return;
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
     }
 
     double angle;
     if(!ARGUMENTS.getDouble(3, angle)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onAddAngle(adrs, pixle, angle);
+    return processor->onAddAngle(adrs, pixel, angle);
 }
 
-void CmdRunner::cmdPing() {
+int CmdRunner::cmdPing() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onPing(adrs);
+    return processor->onPing(adrs);
 }
 
-void CmdRunner::cmdError() {
+int CmdRunner::cmdError() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        return;
+        return ERROR_INVALID_INPUT;
     }
 
-    processor->onError(adrs);
+    return processor->onError(adrs);
 }
 
+int CmdRunner::cmdMoving() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
 
-void CmdRunner::cmdHelp() {
+    return processor->onMoving(adrs);
+}
+
+int CmdRunner::cmdStatus() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onStatus(adrs);
+}
+
+int CmdRunner::cmdHelp() {
     printHelp();
+    return 0;
 }
