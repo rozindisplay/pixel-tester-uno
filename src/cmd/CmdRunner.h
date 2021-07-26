@@ -10,18 +10,23 @@ public:
     void printHelp();
 private:
     TestProcessor* processor;
-    int cmdInit();
+    int cmdGetPixels();
     int cmdHome();
-    int cmdClearError();
-    int cmdLimit();
+    int cmdGetLimit();
+    int cmdSetLimit();
+    int cmdGetSteps();
+    int cmdGetStepsTarget();
     int cmdSetSteps();
     int cmdAddSteps();
+    int cmdGetAngle();
+    int cmdGetAngleTarget();
     int cmdSetAngle();
     int cmdAddAngle();
-    int cmdPing();
-    int cmdError();
     int cmdMoving();
+    int cmdError();
+    int cmdClearError();
     int cmdStatus();
+    int cmdPing();
     int cmdHelp();
 
     void printCmd(const char* cmd, const char* args[], int size, int spaces, const char* description);

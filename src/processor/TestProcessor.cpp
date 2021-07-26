@@ -2,9 +2,20 @@
 #include <processor/TestProcessor.h>
 #include <config/Config.h>
 
-int TestProcessor::onInit(int i2cAddress, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3, const PixLimit& limitP4) {
-    logInit(i2cAddress, limitP1, limitP2, limitP3, limitP4);
-    return PIXEL_WRITER.init(i2cAddress, limitP1, limitP2, limitP3, limitP4);
+int TestProcessor::onGetPixels(int i2cAddress) {
+    logGetPixels(i2cAddress);
+
+    unsigned char count;
+    int err = PIXEL_WRITER.requestPixel(i2cAddress, count);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(count);
+    } else {
+        Serial.print(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
 }
 
 int TestProcessor::onHome(int i2cAddress) {
@@ -12,44 +23,147 @@ int TestProcessor::onHome(int i2cAddress) {
     return PIXEL_WRITER.home(i2cAddress);
 }
 
-int TestProcessor::onClearError(int i2cAddress) {
-    logClearError(i2cAddress);
-    return PIXEL_WRITER.clearErrorCode(i2cAddress);
+int TestProcessor::onHome(int i2cAddress, char pixel) {
+    logHome(i2cAddress, pixel);
+    return PIXEL_WRITER.home(i2cAddress, pixel);
 }
 
-int TestProcessor::onSetLimit(int i2cAddress, char pixle, const PixLimit& limit) {
-    logSetLimit(i2cAddress, pixle, limit);
-    return PIXEL_WRITER.setLimit(i2cAddress, pixle, limit);
-}
-
-int TestProcessor::onSetSteps(int i2cAddress, char pixle, int steps) {
-    logSetSteps(i2cAddress, pixle, steps);
-    return PIXEL_WRITER.setSteps(i2cAddress, pixle, steps);
-}
-
-int TestProcessor::onAddSteps(int i2cAddress, char pixle, int steps) {
-    logAddSteps(i2cAddress, pixle, steps);
-    return PIXEL_WRITER.addSteps(i2cAddress, pixle, steps);
-}
-
-int TestProcessor::onSetAngle(int i2cAddress, char pixle, double angle) {
-    logSetAngle(i2cAddress, pixle, angle);
-    return PIXEL_WRITER.setAngle(i2cAddress, pixle, angle);
-}
-
-int TestProcessor::onAddAngle(int i2cAddress, char pixle, double angle) {
-    logAddAngle(i2cAddress, pixle, angle);
-    return PIXEL_WRITER.addAngle(i2cAddress, pixle, angle);
-}
-
-int TestProcessor::onPing(int i2cAddress) {
-    logPing(i2cAddress);
-
-    int err = PIXEL_WRITER.requestPing(i2cAddress);
+int TestProcessor::onGetLimit(int i2cAddress, char pixel) {
+    logGetLimit(i2cAddress, pixel);
+    
+    PixLimit limit;
+    int err = PIXEL_WRITER.requestLimit(i2cAddress, pixel, limit);
     if(err==0) {
-        Serial.println(" > good");
+        Serial.print(" > ");
+        Serial.print(limit.lower);
+        Serial.print(':');
+        Serial.print(limit.upper);
+        Serial.println();
     } else {
-        Serial.println(" > failed");
+        Serial.print(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+int TestProcessor::onSetLimit(int i2cAddress, char pixel, const PixLimit& limit) {
+    logSetLimit(i2cAddress, pixel, limit);
+    return PIXEL_WRITER.setLimit(i2cAddress, pixel, limit);
+}
+
+int TestProcessor::onGetSteps(int i2cAddress, char pixel) {
+    logGetSteps(i2cAddress, pixel);
+
+    int steps;
+    int err = PIXEL_WRITER.requestSteps(i2cAddress, pixel, steps);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(steps);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+int TestProcessor::onGetStepsTarget(int i2cAddress, char pixel) {
+    logGetStepsTarget(i2cAddress, pixel);
+
+    int steps;
+    int err = PIXEL_WRITER.requestTargetSteps(i2cAddress, pixel, steps);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(steps);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+
+int TestProcessor::onSetSteps(int i2cAddress, char pixel, int steps) {
+    logSetSteps(i2cAddress, pixel, steps);
+    return PIXEL_WRITER.setSteps(i2cAddress, pixel, steps);
+}
+
+int TestProcessor::onAddSteps(int i2cAddress, char pixel, int steps) {
+    logAddSteps(i2cAddress, pixel, steps);
+    return PIXEL_WRITER.addSteps(i2cAddress, pixel, steps);
+}
+
+int TestProcessor::onGetAngle(int i2cAddress, char pixel) {
+    logGetAngle(i2cAddress, pixel);
+
+    double angle;
+    int err = PIXEL_WRITER.requestAngle(i2cAddress, pixel, angle);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(angle);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+int TestProcessor::onGetAngleTarget(int i2cAddress, char pixel) {
+    logGetAngleTarget(i2cAddress, pixel);
+
+    double angle;
+    int err = PIXEL_WRITER.requestTargetAngle(i2cAddress, pixel, angle);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(angle);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+int TestProcessor::onSetAngle(int i2cAddress, char pixel, double angle) {
+    logSetAngle(i2cAddress, pixel, angle);
+    return PIXEL_WRITER.setAngle(i2cAddress, pixel, angle);
+}
+
+int TestProcessor::onAddAngle(int i2cAddress, char pixel, double angle) {
+    logAddAngle(i2cAddress, pixel, angle);
+    return PIXEL_WRITER.addAngle(i2cAddress, pixel, angle);
+}
+
+int TestProcessor::onMoving(int i2cAddress) {
+    logMoving(i2cAddress);
+    
+    unsigned char count;
+    int err = PIXEL_WRITER.requestMoving(i2cAddress, count);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(count);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+int TestProcessor::onMoving(int i2cAddress, char pixel) {
+    logMoving(i2cAddress, pixel);
+    
+    bool isMoving;
+    int err = PIXEL_WRITER.requestIsMoving(i2cAddress, pixel, isMoving);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(isMoving);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
     }
 
     return err;
@@ -61,31 +175,20 @@ int TestProcessor::onError(int i2cAddress) {
     int code;
     int err = PIXEL_WRITER.requestErrorCode(i2cAddress, code);
     Serial.println(code);
-    if(err!=0) {
-        Serial.println(" > failed");
-        return err;
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println(code);
+    } else {
+        Serial.println(" > ");
+        Serial.println("failed");
     }
-
-    Serial.print(" > ");
-    Serial.println(code);
 
     return err;
 }
 
-int TestProcessor::onMoving(int i2cAddress) {
-    logMoving(i2cAddress);
-    
-    unsigned char count;
-    int err = PIXEL_WRITER.requestMovingCount(i2cAddress, count);
-    if(err!=0) {
-        Serial.println(" > failed");
-        return err;
-    }
-
-    Serial.print(" > ");
-    Serial.println(count);
-
-    return err;
+int TestProcessor::onClearError(int i2cAddress) {
+    logClearError(i2cAddress);
+    return PIXEL_WRITER.clearErrorCode(i2cAddress);
 }
 
 int TestProcessor::onStatus(int i2cAddress, char pixel) {
@@ -124,27 +227,26 @@ int TestProcessor::onStatus(int i2cAddress, char pixel) {
     return err;
 }
 
-void TestProcessor::logInit(int i2cAddress, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3, const PixLimit& limitP4) {
-    Serial.print("init");
+int TestProcessor::onPing(int i2cAddress) {
+    logPing(i2cAddress);
+
+    int err = PIXEL_WRITER.requestPing(i2cAddress);
+    if(err==0) {
+        Serial.print(" > ");
+        Serial.println("success");
+    } else {
+        Serial.print(" > ");
+        Serial.println("failed");
+    }
+
+    return err;
+}
+
+void TestProcessor::logGetPixels(int i2cAddress) {
+    Serial.print("pixels");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
-    Serial.print(' ');
-    Serial.print(limitP1.lower);
-    Serial.print(':');
-    Serial.print(limitP1.upper);
-    Serial.print(' ');
-    Serial.print(limitP2.lower);
-    Serial.print(':');
-    Serial.print(limitP2.upper);
-    Serial.print(' ');
-    Serial.print(limitP3.lower);
-    Serial.print(':');
-    Serial.print(limitP3.upper);
-    Serial.print(' ');
-    Serial.print(limitP4.lower);
-    Serial.print(':');
-    Serial.print(limitP4.upper);
     Serial.println();
 }
 
@@ -156,21 +258,33 @@ void TestProcessor::logHome(int i2cAddress) {
     Serial.println();
 }
 
-void TestProcessor::logClearError(int i2cAddress) {
-    Serial.print("clear-error");
+void TestProcessor::logHome(int i2cAddress, char pixel) {
+    Serial.print("home");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixel);
     Serial.println();
 }
 
-void TestProcessor::logSetLimit(int i2cAddress, char pixle, const PixLimit& limit) {
+void TestProcessor::logGetLimit(int i2cAddress, char pixel) {
     Serial.print("limit");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.print((int)pixle);
+    Serial.print((int)pixel);
+    Serial.println();
+}
+
+void TestProcessor::logSetLimit(int i2cAddress, char pixel, const PixLimit& limit) {
+    Serial.print("limit");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.print((int)pixel);
     Serial.print(' ');
     Serial.print(limit.lower);
     Serial.print(':');
@@ -178,66 +292,88 @@ void TestProcessor::logSetLimit(int i2cAddress, char pixle, const PixLimit& limi
     Serial.println();
 }
 
-void TestProcessor::logSetSteps(int i2cAddress, char pixle, int steps) {
+void TestProcessor::logGetSteps(int i2cAddress, char pixel) {
+    Serial.println("steps");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logGetStepsTarget(int i2cAddress, char pixel) {
+    Serial.println("steps-target");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logSetSteps(int i2cAddress, char pixel, int steps) {
     Serial.println("set-steps");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.print((int)pixle);
+    Serial.print((int)pixel);
     Serial.print(' ');
     Serial.print(steps);
     Serial.println();
 }
 
-void TestProcessor::logAddSteps(int i2cAddress, char pixle, int steps) {
+void TestProcessor::logAddSteps(int i2cAddress, char pixel, int steps) {
     Serial.println("add-steps");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.print((int)pixle);
+    Serial.print((int)pixel);
     Serial.print(' ');
     Serial.print(steps);
     Serial.println();
 }
 
-void TestProcessor::logSetAngle(int i2cAddress, char pixle, double angle) {
+void TestProcessor::logGetAngle(int i2cAddress, char pixel) {
+    Serial.println("angle");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logGetAngleTarget(int i2cAddress, char pixel) {
+    Serial.println("angle-target");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logSetAngle(int i2cAddress, char pixel, double angle) {
     Serial.println("set-angle");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.print((int)pixle);
+    Serial.print((int)pixel);
     Serial.print(' ');
     Serial.print(angle);
     Serial.println();
 }
 
-void TestProcessor::logAddAngle(int i2cAddress, char pixle, double angle) {
+void TestProcessor::logAddAngle(int i2cAddress, char pixel, double angle) {
     Serial.println("add-angle");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.print((int)pixle);
+    Serial.print((int)pixel);
     Serial.print(' ');
     Serial.print(angle);
     Serial.println();
-}
-
-void TestProcessor::logPing(int i2cAddress) {
-    Serial.print("ping");
-    Serial.print(':');
-    Serial.print(' ');
-    Serial.println(i2cAddress);
-}
-
-void TestProcessor::logError(int i2cAddress) {
-    Serial.print("error");
-    Serial.print(':');
-    Serial.print(' ');
-    Serial.println(i2cAddress);
 }
 
 void TestProcessor::logMoving(int i2cAddress) {
@@ -247,11 +383,42 @@ void TestProcessor::logMoving(int i2cAddress) {
     Serial.println(i2cAddress);
 }
 
-void TestProcessor::logStatus(int i2cAddress, char pixle) {
+void TestProcessor::logMoving(int i2cAddress, char pixel) {
+    Serial.print("moving");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.print(' ');
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logError(int i2cAddress) {
+    Serial.print("error");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+}
+
+void TestProcessor::logClearError(int i2cAddress) {
+    Serial.print("clear-error");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.print(i2cAddress);
+    Serial.println();
+}
+
+void TestProcessor::logStatus(int i2cAddress, char pixel) {
     Serial.print("status");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
     Serial.print(' ');
-    Serial.println((int)pixle);
+    Serial.println((int)pixel);
+}
+
+void TestProcessor::logPing(int i2cAddress) {
+    Serial.print("ping");
+    Serial.print(':');
+    Serial.print(' ');
+    Serial.println(i2cAddress);
 }

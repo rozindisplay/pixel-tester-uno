@@ -25,30 +25,40 @@ void CmdRunner::run() {
 
     int err;
 
-    if(strcmp("init", token)==0) {
-        err = cmdInit();
+    if(strcmp("pixels", token)==0) {
+        err = cmdGetPixels();
     } else if(strcmp("home", token)==0) {
         err = cmdHome();
-    } else if (strcmp("clear-error", token)==0) {
-        err = cmdClearError();
     } else if (strcmp("limit", token)==0) {
-        err = cmdLimit();
+        err = cmdGetLimit();
+    } else if (strcmp("set-limit", token)==0) {
+        err = cmdSetLimit();
+    } else if (strcmp("steps", token)==0) {
+        err = cmdGetSteps();
+    } else if (strcmp("steps-target", token)==0) {
+        err = cmdGetStepsTarget();
     } else if (strcmp("set-steps", token)==0) {
         err = cmdSetSteps();
     } else if (strcmp("add-steps", token)==0) {
         err = cmdAddSteps();
+    } else if (strcmp("angle", token)==0) {
+        err = cmdGetAngle();
+    } else if (strcmp("angle-target", token)==0) {
+        err = cmdGetAngleTarget();
     } else if (strcmp("set-angle", token)==0) {
         err = cmdSetAngle();
     } else if (strcmp("add-angle", token)==0) {
         err = cmdAddAngle();
-    } else if (strcmp("ping", token)==0) {
-        err = cmdPing();
-    } else if (strcmp("error", token)==0) {
-        err = cmdError();
     } else if (strcmp("moving", token)==0) {
         err = cmdMoving();
+    } else if (strcmp("error", token)==0) {
+        err = cmdError();
+    } else if (strcmp("clear-error", token)==0) {
+        err = cmdClearError();
     } else if (strcmp("status", token)==0) {
         err = cmdStatus();
+    } else if (strcmp("ping", token)==0) {
+        err = cmdPing();
     } else if (strcmp("help", token)==0) {
         err = cmdHelp();
     } else {
@@ -66,63 +76,88 @@ void CmdRunner::run() {
 void CmdRunner::printHelp() {
     Serial.println("Pixel-Tester");
     Serial.println();
-    Serial.println("Commands:");
+    Serial.println("Commands: <arg> => arg is required; [arg] => arg is optional");
     
-    // init <adrs> <l>:<h> <l>:<h> <l>:<h> <l>:<h> - sets the limits for all pixels and runs the home process
-    // home <adrs>                                 - runs the home process
-    // clear-error <adrs>                          - clears and resets the error code
-    // limit <adrs> <pixel> <l>:<h>                - sets the limits for the given pixel
-    // set-steps <adrs> <pixel> <steps>            - sets the position to the given steps
-    // set-angle <adrs> <pixel> <angle>            - sets the position to the given angle
-    // ping <adrs>                                 - makes a ping request
-    // error <adrs>                                - makes a request for an error code
-    // moving <adrs>                               - makes a request for the number of pixels currently moving
-    // status <adrs>                               - makes a request for the current status
-    // help                                        - print this menu
+    // pixels <adrs>                          - requests the number of pixels on the node
+    // home <adrs> [pixel]                    - runs the home process for the node or pixel
+    // limit <adrs> <pixel>                   - requests the pixel's limits
+    // set-limit <adrs> <pixel> <l>:<h>       - sets the limits for a pixel
+    // steps <adrs> <pixel>                   - requests the pixel's current position in steps from zero
+    // steps-target <adrs> <pixel>            - requests the pixel's target position in steps
+    // set-steps <adrs> <pixel> <steps>       - sets the position to the given steps
+    // add-steps <adrs> <pixel> <steps>       - adds the given steps to the current position
+    // angle <adrs> <pixel>                   - requests the pixel's current position in degrees from zero
+    // angle-target <adrs> <pixel>            - requests the pixel's target position in degrees from zero
+    // set-angle <adrs> <pixel> <angle>       - sets the position to the given angle
+    // add-angle <adrs> <pixel> <angle>       - adds the given angle to the current position
+    // moving <adrs> [pixel]                  - requests the number pixels currently moving
+    // error <adrs>                           - requests the nodes last error code
+    // clear-error <adrs>                     - clears the error code
+    // status <adrs>                          - makes a request for the current status
+    // ping <adrs>                            - makes a ping request
+    // help                                   - print this menu
 
-    // init
-    const char* initArgs[] = {"<adrs>", "<l>:<h>", "<l>:<h>", "<l>:<h>", "<l>:<h>"};
-    printCmd("init", initArgs, 5, 1, "sets the limits for all pixels and runs the home process");
+
+    const char* argsAdrs[] = {"<adrs>"};
+    const char* argsAdrsPix[] = {"<adrs>", "<pixel>"};
+    const char* argsAdrsOpPix[] = {"<adrs>", "[pixel]"};
+    const char* argsAdrsPixLim[] = {"<adrs>", "<pixel>", "<l>:<h>"};
+    const char* argsAdrsPixSteps[] = {"<adrs>", "<pixel>", "<steps>"};
+    const char* argsAdrsPixAngle[] = {"<adrs>", "<pixel>", "<angle>"};
+
+    // pixels
+    printCmd("pixels", argsAdrs, 1, 26, "requests the number of pixels on the node");
 
     // home
-    const char* adrsArgs[] = {"<adrs>"};
-    printCmd("home", adrsArgs, 1, 33, "runs the home process");
-
-    // clear errors
-    printCmd("clear-error", adrsArgs, 1, 26, "clears and resets the error code");
+    printCmd("home", argsAdrsOpPix, 2, 20, "runs the home process for the node or pixel");
 
     // limit
-    const char* limitArgs[] = {"<adrs>", "<pixel>", "<l>:<h>"};
-    printCmd("limit", limitArgs, 3, 16, "clears and resets the error code");
+    printCmd("limit", argsAdrsPix, 2, 19, "requests the pixel's limits");
+
+    // set-limit
+    printCmd("set-limit", argsAdrsPixLim, 3, 7, "sets the limits for a pixel");
+
+    // steps
+    printCmd("steps", argsAdrsPix, 2, 19, "requests the pixel's current position in steps from zero");
+
+    // steps-target
+    printCmd("steps-target", argsAdrsPix, 2, 12, "requests the pixel's target position in steps");
 
     // set-steps
-    const char* stepsArgs[] = {"<adrs>", "<pixel>", "<steps>"};
-    printCmd("set-steps", stepsArgs, 3, 12, "sets the position to the given steps");
+    printCmd("set-steps", argsAdrsPixSteps, 3, 7, "sets the position to the given steps");
 
     // add-steps
-    printCmd("add-steps", stepsArgs, 3, 12, "adds the given steps to the current position");
+    printCmd("add-steps", argsAdrsPixSteps, 3, 7, "adds the given steps to the current position");
+
+    // angle
+    printCmd("angle", argsAdrsPix, 2, 19, "requests the pixel's current position in degrees from zero");
+
+    // angle-target
+    printCmd("angle-target", argsAdrsPix, 2, 12, "requests the pixel's target position in degrees from zero");
 
     // set-angle
-    const char* angleArgs[] = {"<adrs>", "<pixel>", "<angle>"};
-    printCmd("set-angle", angleArgs, 3, 12, "sets the position to the given angle");
+    printCmd("set-angle", argsAdrsPixAngle, 3, 7, "sets the position to the given angle");
 
     // add-angle
-    printCmd("add-angle", angleArgs, 3, 12, "adds the given angle to the current position");
-
-    // ping
-    printCmd("ping", adrsArgs, 1, 33, "makes a ping request");
-
-    // error
-    printCmd("error", adrsArgs, 1, 32, "makes a request for an error code");
+    printCmd("add-angle", argsAdrsPixAngle, 3, 7, "adds the given angle to the current position");
 
     // moving
-    printCmd("moving", adrsArgs, 1, 31, "makes a request for the number of pixels currently moving");
+    printCmd("moving", argsAdrsOpPix, 2, 18, "requests the number pixels currently moving");
+
+    // error
+    printCmd("error", argsAdrs, 1, 27, "requests the nodes last error code");
+
+    // clear-error
+    printCmd("clear-error", argsAdrs, 1, 21, "clears the error code");
 
     // status
-    printCmd("status", adrsArgs, 1, 31, "makes a request for the current status");
+    printCmd("status", argsAdrs, 1, 26, "makes a request for the status of a pixel");
+
+    // ping
+    printCmd("ping", argsAdrs, 1, 28, "makes a ping request");
 
     // help
-    printCmd("help", adrsArgs, 0, 40, "print this menu");
+    printCmd("help", argsAdrs, 0, 35, "print this menu");
 }
 
 void CmdRunner::printCmd(const char* cmd, const char* args[], int argsize, int spaces, const char* description) {
@@ -141,57 +176,49 @@ void CmdRunner::printCmd(const char* cmd, const char* args[], int argsize, int s
     Serial.println(description);
 }
 
-int CmdRunner::cmdInit() {
+int CmdRunner::cmdGetPixels() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
         return ERROR_INVALID_INPUT;
     }
-    
-    int lo = 0;
-    int hi = 0;
-    if(!ARGUMENTS.getLimits(2, lo, hi)) {
-        return ERROR_INVALID_INPUT;
-    }
-    PixLimit l1(lo, hi);
 
-    if(!ARGUMENTS.getLimits(3, lo, hi)) {
-        return ERROR_INVALID_INPUT;
-    }
-    PixLimit l2(lo, hi);
-
-    if(!ARGUMENTS.getLimits(4, lo, hi)) {
-        return ERROR_INVALID_INPUT;
-    }
-    PixLimit l3(lo, hi);
-
-    if(!ARGUMENTS.getLimits(5, lo, hi)) {
-        return ERROR_INVALID_INPUT;
-    }
-    PixLimit l4(lo, hi);
-
-    return processor->onInit(adrs, l1, l2, l3, l4);
+    return processor->onGetPixels(adrs);
 }
 
 int CmdRunner::cmdHome() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
-        // todo
         return ERROR_INVALID_INPUT;
     }
 
-    return processor->onHome(adrs);
+    if(ARGUMENTS.getCount()==2) {
+        // pixel defined
+        int pixel;
+        if(!ARGUMENTS.getInt(2, pixel)) {
+            return ERROR_INVALID_INPUT;
+        }
+        return processor->onHome(adrs, pixel);
+    } else {
+        // pixel not defined
+        return processor->onHome(adrs);
+    }
 }
 
-int CmdRunner::cmdClearError() {
+int CmdRunner::cmdGetLimit() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
         return ERROR_INVALID_INPUT;
     }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
 
-    return processor->onClearError(adrs);
+    return processor->onGetLimit(adrs, pixel);
 }
 
-int CmdRunner::cmdLimit() {
+int CmdRunner::cmdSetLimit() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
         return ERROR_INVALID_INPUT;
@@ -210,6 +237,34 @@ int CmdRunner::cmdLimit() {
 
     PixLimit limit(lo, hi);
     return processor->onSetLimit(adrs, pixel, limit);
+}
+
+int CmdRunner::cmdGetSteps() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onGetSteps(adrs, pixel);
+}
+
+int CmdRunner::cmdGetStepsTarget() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onGetStepsTarget(adrs, pixel);
 }
 
 int CmdRunner::cmdSetSteps() {
@@ -251,6 +306,34 @@ int CmdRunner::cmdAddSteps() {
     return processor->onAddSteps(adrs, pixel, steps);
 }
 
+int CmdRunner::cmdGetAngle() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onGetAngle(adrs, pixel);
+}
+
+int CmdRunner::cmdGetAngleTarget() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+    
+    int pixel;
+    if(!ARGUMENTS.getInt(2, pixel)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onGetAngleTarget(adrs, pixel);
+}
+
 int CmdRunner::cmdSetAngle() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
@@ -289,13 +372,24 @@ int CmdRunner::cmdAddAngle() {
     return processor->onAddAngle(adrs, pixel, angle);
 }
 
-int CmdRunner::cmdPing() {
+int CmdRunner::cmdMoving() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
         return ERROR_INVALID_INPUT;
     }
 
-    return processor->onPing(adrs);
+    if(ARGUMENTS.getCount()>2) {
+        // pixel given
+        int pixel;
+        if(!ARGUMENTS.getInt(2, pixel)) {
+            return ERROR_INVALID_INPUT;
+        }
+
+        return processor->onMoving(adrs, pixel);
+    } else {
+        // pixel not given
+        return processor->onMoving(adrs);
+    }
 }
 
 int CmdRunner::cmdError() {
@@ -307,13 +401,13 @@ int CmdRunner::cmdError() {
     return processor->onError(adrs);
 }
 
-int CmdRunner::cmdMoving() {
+int CmdRunner::cmdClearError() {
     int adrs;
     if(!ARGUMENTS.getInt(1, adrs)) {
         return ERROR_INVALID_INPUT;
     }
 
-    return processor->onMoving(adrs);
+    return processor->onClearError(adrs);
 }
 
 int CmdRunner::cmdStatus() {
@@ -328,6 +422,15 @@ int CmdRunner::cmdStatus() {
     }
 
     return processor->onStatus(adrs, pixel);
+}
+
+int CmdRunner::cmdPing() {
+    int adrs;
+    if(!ARGUMENTS.getInt(1, adrs)) {
+        return ERROR_INVALID_INPUT;
+    }
+
+    return processor->onPing(adrs);
 }
 
 int CmdRunner::cmdHelp() {
