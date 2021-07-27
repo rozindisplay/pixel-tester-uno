@@ -191,7 +191,7 @@ int CmdRunner::cmdHome() {
         return ERROR_INVALID_INPUT;
     }
 
-    if(ARGUMENTS.getCount()==2) {
+    if(ARGUMENTS.getCount()>2) {
         // pixel defined
         int pixel;
         if(!ARGUMENTS.getInt(2, pixel)) {

@@ -174,7 +174,6 @@ int TestProcessor::onError(int i2cAddress) {
 
     int code;
     int err = PIXEL_WRITER.requestErrorCode(i2cAddress, code);
-    Serial.println(code);
     if(err==0) {
         Serial.print(" > ");
         Serial.println(code);
@@ -293,7 +292,7 @@ void TestProcessor::logSetLimit(int i2cAddress, char pixel, const PixLimit& limi
 }
 
 void TestProcessor::logGetSteps(int i2cAddress, char pixel) {
-    Serial.println("steps");
+    Serial.print("steps");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -302,7 +301,7 @@ void TestProcessor::logGetSteps(int i2cAddress, char pixel) {
 }
 
 void TestProcessor::logGetStepsTarget(int i2cAddress, char pixel) {
-    Serial.println("steps-target");
+    Serial.print("steps-target");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -311,7 +310,7 @@ void TestProcessor::logGetStepsTarget(int i2cAddress, char pixel) {
 }
 
 void TestProcessor::logSetSteps(int i2cAddress, char pixel, int steps) {
-    Serial.println("set-steps");
+    Serial.print("set-steps");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -323,7 +322,7 @@ void TestProcessor::logSetSteps(int i2cAddress, char pixel, int steps) {
 }
 
 void TestProcessor::logAddSteps(int i2cAddress, char pixel, int steps) {
-    Serial.println("add-steps");
+    Serial.print("add-steps");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -335,7 +334,7 @@ void TestProcessor::logAddSteps(int i2cAddress, char pixel, int steps) {
 }
 
 void TestProcessor::logGetAngle(int i2cAddress, char pixel) {
-    Serial.println("angle");
+    Serial.print("angle");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -344,7 +343,7 @@ void TestProcessor::logGetAngle(int i2cAddress, char pixel) {
 }
 
 void TestProcessor::logGetAngleTarget(int i2cAddress, char pixel) {
-    Serial.println("angle-target");
+    Serial.print("angle-target");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -353,7 +352,7 @@ void TestProcessor::logGetAngleTarget(int i2cAddress, char pixel) {
 }
 
 void TestProcessor::logSetAngle(int i2cAddress, char pixel, double angle) {
-    Serial.println("set-angle");
+    Serial.print("set-angle");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -365,7 +364,7 @@ void TestProcessor::logSetAngle(int i2cAddress, char pixel, double angle) {
 }
 
 void TestProcessor::logAddAngle(int i2cAddress, char pixel, double angle) {
-    Serial.println("add-angle");
+    Serial.print("add-angle");
     Serial.print(':');
     Serial.print(' ');
     Serial.print(i2cAddress);
@@ -396,7 +395,7 @@ void TestProcessor::logError(int i2cAddress) {
     Serial.print("error");
     Serial.print(':');
     Serial.print(' ');
-    Serial.print(i2cAddress);
+    Serial.println(i2cAddress);
 }
 
 void TestProcessor::logClearError(int i2cAddress) {
